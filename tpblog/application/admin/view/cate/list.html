@@ -1,0 +1,143 @@
+{include file="public/_head" /}
+<!-- Main Container -->
+<div class="main-container container-fluid">
+    <!-- Page Container -->
+    <div class="page-container">
+
+        <!-- Page Sidebar -->
+        {include file="public/_left" /}
+        <!-- /Page Sidebar -->
+        <!-- Page Content -->
+        <div class="page-content">
+            <!-- Page Breadcrumb -->
+            <div class="page-breadcrumbs">
+                <ul class="breadcrumb">
+                    <li class="active">
+                        <i class="fa fa-home"></i>&nbsp;栏目管理
+                    </li>
+                    <li>栏目列表</li>
+                </ul>
+            </div>
+            <!-- /Page Breadcrumb -->
+            <!-- Page Body -->
+            <div class="page-body">
+                <a href="{:url('admin/cate/add')}" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i>&nbsp;栏目添加</a>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="widget">
+                            <div class="widget-header">
+                                <span class="widget-caption">栏目列表</span>
+                                <div class="widget-buttons">
+<!--                                    <ul class="pagination pagination-sm">-->
+<!--                                        <li class="disabled"><a href="#">«</a></li>-->
+<!--                                        <li class="active"><a href="#">1 <span class="sr-only">(current)</span></a></li>-->
+<!--                                        <li><a href="#">2</a></li>-->
+<!--                                        <li><a href="#">3</a></li>-->
+<!--                                        <li><a href="#">»</a></li>-->
+<!--                                    </ul>-->
+                                    {$cateData.cates->render()|raw|replace}
+                                </div>
+                            </div>
+                            <div class="widget-body">
+                                <table class="table table-hover table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>栏目名称</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {volist name='cateData.cates' id='vo'}
+                                    <tr>
+                                        <td><input type="text" name="sort" size="1" dataId="{$vo.id}" value="{$vo.sort}" /></td>
+                                        <td>{$vo.catename}</td>
+                                        <td>
+                                            <a href="{:url('admin/cate/edit', ['id' => $vo.id])}" class="btn btn-azure btn-xs">编辑</a>
+                                            <a href="#" dataId="{$vo.id}" class="btn btn-danger btn-xs cate-del">删除</a>
+                                        </td>
+                                    </tr>
+                                    {/volist}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /Page Body -->
+        </div>
+        <!-- /Page Content -->
+
+    </div>
+    <!-- /Page Container -->
+    <!-- Main Container -->
+
+</div>
+
+{include file="public/_js" /}
+<script>
+    $(function () {
+        $('.pagination').addClass('pagination-sm');
+
+        //改变排序
+        $('input[name=sort]').change(function () {
+           var id = $(this).attr('dataId');
+           var sort = $(this).val();
+            $.ajax({
+                url: '{:url("admin/cate/sort")}',
+                type: 'post',
+                data: {id: id, sort: sort},
+                dataType: 'json',
+                success: function (data) {
+                    if (data.code == 1) {
+                        location.href = data.url;
+                    }else {
+                        alert(data.msg);
+                    }
+                }
+            });
+
+            return false;
+        });
+
+        //删除
+        $('.cate-del').click(function () {
+            var id = $(this).attr('dataId');
+
+            layer.confirm('确定要删除吗？', {
+                title: '提示',
+                icon: 3
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    url: '{:url("admin/cate/del")}',
+                    type: 'post',
+                    data: {id:id},
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.code == 1) {
+                            layer.msg(data.msg, {
+                                icon: 6,
+                                time: 2000
+                            }, function () {
+                                location.href = data.url;
+                            });
+                        }else {
+                            layer.open({
+                                title: '删除失败',
+                                content: data.msg,
+                                icon: 5,
+                                anim: 6
+                            });
+                        }
+                    }
+                });
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+<!--  /Body -->
+</html>

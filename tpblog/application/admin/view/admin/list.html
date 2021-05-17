@@ -1,0 +1,178 @@
+{include file="public/_head" /}
+<!-- Main Container -->
+<div class="main-container container-fluid">
+    <!-- Page Container -->
+    <div class="page-container">
+
+        <!-- Page Sidebar -->
+        {include file="public/_left" /}
+        <!-- /Page Sidebar -->
+        <!-- Page Content -->
+        <div class="page-content">
+            <!-- Page Breadcrumb -->
+            <div class="page-breadcrumbs">
+                <ul class="breadcrumb">
+                    <li>
+                        <i class="fa fa-home"></i>&nbsp;管理员管理
+                    </li>
+                    <li>管理员列表</li>
+                </ul>
+            </div>
+            <!-- /Page Breadcrumb -->
+            <!-- Page Body -->
+            <div class="page-body">
+                <a href="{:url('admin/admin/add')}" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i>&nbsp;添加管理员</a>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="widget">
+                            <div class="widget-header">
+                                <span class="widget-caption">管理员列表</span>
+                                <div class="widget-buttons">
+<!--                                    <ul class="pagination pagination-sm">-->
+<!--                                        <li class="disabled"><a href="#">«</a></li>-->
+<!--                                        <li class="active"><a href="#">1</a></li>-->
+<!--                                        <li><a href="#">2</a></li>-->
+<!--                                        <li><a href="#">3</a></li>-->
+<!--                                        <li><a href="#">4</a></li>-->
+<!--                                        <li><a href="#">»</a></li>-->
+<!--                                    </ul>-->
+                                    {$admin->render()|raw|replace}
+                                </div>
+                            </div>
+                            <div class="widget-body">
+                                <table class="table table-hover table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>管理员账号</th>
+                                        <th>管理员昵称</th>
+                                        <th>管理员邮箱</th>
+                                        <th>管理员类别</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    {volist name="admin" id="vo"}
+                                    <tr>
+                                        <td>{$vo.id}</td>
+                                        <td>{$vo.username}</td>
+                                        <td>{$vo.nickname}</td>
+                                        <td>{$vo.email}</td>
+                                        <td>{if $vo.is_super == 1}超级管理员{else /}普通管理员{/if}</td>
+                                        <td>{if $vo.status == 1}启用{else /}禁用{/if}</td>
+                                        <td>
+                                            {if Session::get('admin.is_super') == 1 and $vo.is_super != 1}
+                                            {if $vo.status == 1}
+                                            <a href="#" class="btn btn-sm btn-darkorange adminStatus" status="{$vo.status}" dataId="{$vo.id}">禁用</a>
+                                            {else /}
+                                            <a href="#" class="btn btn-sm btn-success adminStatus" status="{$vo.status}" dataId="{$vo.id}">启用</a>
+                                            {/if}
+                                            {/if}
+                                            {if (Session::get('admin.is_super') != 1) and ($vo.is_super == 1) }
+                                            <a href="#" class="btn btn-sm btn-warning" style="display: none">编辑</a>
+                                            <a href="#" class="btn btn-sm btn-danger" style="display: none">删除</a>
+                                            {else /}
+                                            <a href="{:url('admin/admin/edit', ['id'=>$vo.id])}" class="btn btn-sm btn-warning">编辑</a>
+                                            <a href="#" class="btn btn-sm btn-danger admin-del" dataId="{$vo.id}">删除</a>
+                                            {/if}
+                                        </td>
+
+                                    </tr>
+                                    {/volist}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /Page Body -->
+        </div>
+        <!-- /Page Content -->
+
+    </div>
+    <!-- /Page Container -->
+    <!-- Main Container -->
+
+</div>
+
+{include file="public/_js" /}
+<script>
+    $('.pagination').addClass('pagination-sm');
+
+    $(function () {
+        //更改状态
+       $('.adminStatus').click(function () {
+           var id = $(this).attr('dataId');
+           var status = $(this).attr('status');
+           if (status == 1) {
+               var msg = '禁用成功~';
+           }else {
+               var msg = '启用成功~';
+           }
+           $.ajax({
+               url: '{:url("admin/admin/status")}',
+               type: 'post',
+               data: {id: id, status: status},
+               dataType: 'json',
+               success: function (data) {
+                   if (data.code == 1) {
+                       layer.msg(msg, {
+                          icon: 6,
+                          time: 2000
+                       }, function () {
+                           location.href = data.url;
+                       });
+                   }else {
+                       layer.open({
+                           title: '状态更改',
+                           content: data.msg,
+                           icon: 5,
+                           anim: 6
+                       });
+                   }
+               }
+           });
+
+           return false;
+       });
+
+       //删除管理员
+        $('.admin-del').click(function () {
+            var id = $(this).attr('dataId');
+            layer.confirm('确定要删除吗？', {
+                title: '删除管理员',
+                icon: 3
+            }, function (index) {
+                layer.close(index);
+
+                $.ajax({
+                    url: '{:url("admin/admin/del")}',
+                    type: 'post',
+                    data: {id: id},
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.code == 1) {
+                            layer.msg(data.msg, {
+                                icon: 6,
+                                time: 2000
+                            }, function () {
+                                location.href = data.url;
+                            });
+                        }else {
+                            layer.open({
+                                title: '删除管理员失败',
+                                content: data.msg,
+                                icon: 5,
+                                anim: 6
+                            });
+                        }
+                    }
+                });
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+<!--  /Body -->
+</html>

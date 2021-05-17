@@ -1,0 +1,171 @@
+{include file="public/_head" /}
+<!-- Main Container -->
+<div class="main-container container-fluid">
+    <!-- Page Container -->
+    <div class="page-container">
+
+        <!-- Page Sidebar -->
+        {include file="public/_left" /}
+        <!-- /Page Sidebar -->
+        <!-- Page Content -->
+        <div class="page-content">
+            <!-- Page Breadcrumb -->
+            <div class="page-breadcrumbs">
+                <ul class="breadcrumb">
+                    <li>
+                        <i class="fa fa-home"></i>&nbsp;文章管理
+                    </li>
+                    <li>文章列表</li>
+                </ul>
+            </div>
+            <!-- /Page Breadcrumb -->
+            <!-- Page Body -->
+            <div class="page-body">
+                <a href="{:url('admin/article/add')}" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i>&nbsp;添加文章</a>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="widget">
+                            <div class="widget-header">
+                                <span class="widget-caption">文章列表</span>
+                                <div class="widget-buttons">
+<!--                                    <ul class="pagination pagination-sm">-->
+<!--                                        <li class="disabled"><a href="#">«</a></li>-->
+<!--                                        <li class="active"><a href="#">1</a></li>-->
+<!--                                        <li><a href="#">2</a></li>-->
+<!--                                        <li><a href="#">3</a></li>-->
+<!--                                        <li><a href="#">4</a></li>-->
+<!--                                        <li><a href="#">»</a></li>-->
+<!--                                    </ul>-->
+                                    {$articleInfo->render()|raw|replace}
+                                </div>
+                            </div>
+                            <div class="widget-body">
+                                <table class="table table-hover table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>文章标题</th>
+                                        <th>作者</th>
+                                        <th>所属导航</th>
+                                        <th>推荐</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    {volist name="articleInfo" id="vo"}
+                                    <tr>
+                                        <td>{$vo.id}</td>
+                                        <td>{$vo.title}</td>
+                                        <td>{$vo.author}</td>
+                                        <td>{$vo.cate.catename}</td>
+                                        <td>{$vo.is_top}</td>
+                                        <td>
+                                            {if $vo.is_top == 1}
+                                            <a href="#" class="btn btn-sm btn-blue is-top" dataId="{$vo.id}" isTop="{$vo.is_top}">推荐</a>
+                                            {else /}
+                                            <a href="#" class="btn btn-sm btn-azure is-top" dataId="{$vo.id}" isTop="{$vo.is_top}">没有推荐</a>
+                                            {/if}
+                                            <a href="{:url('admin/article/edit', ['id' => $vo.id])}" class="btn btn-sm btn-warning">编辑</a>
+                                            <a href="#" class="btn btn-sm btn-danger article-del" delId="{$vo.id}">删除</a>
+                                        </td>
+                                    </tr>
+                                    {/volist}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /Page Body -->
+        </div>
+        <!-- /Page Content -->
+
+    </div>
+    <!-- /Page Container -->
+    <!-- Main Container -->
+
+</div>
+
+{include file="public/_js" /}
+<script>
+    $(function () {
+        $('.pagination').addClass('pagination-sm');
+
+        //改变推荐
+        $('.is-top').click(function () {
+            //获取属性值
+            var id = $(this).attr('dataId');
+            var isTop = $(this).attr('isTop');
+
+            $.ajax({
+                url: '{:url("admin/article/top")}',
+                type: 'post',
+                data: {id:id, isTop:isTop},
+                dataType: 'json',
+                success: function (data) {
+                    layer.confirm('确定要设置吗？', {
+                        title: '提示',
+                        icon: 3
+                    }, function (index) {
+                        layer.close(index);
+                        if (data.code == 1) {
+                            layer.msg(data.msg, {
+                                icon: 6,
+                                time: 2000
+                            }, function () {
+                                location.href = data.url;
+                            });
+                        }else {
+                            layer.open({
+                                title: '设置失败',
+                                content: data.msg,
+                                icon: 5,
+                                anim: 6
+                            });
+                        }
+                    });
+                }
+            });
+
+            return false;
+        });
+
+        //删除操作
+        $('.article-del').click(function () {
+            var id = $(this).attr('delId');
+            layer.confirm('确定要删除吗？', {
+                title: '文章删除',
+                icon: 3
+            }, function (index) {
+                layer.close(index);
+
+                $.ajax({
+                    url: '{:url("admin/article/del")}',
+                    type: 'post',
+                    data: {id: id},
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.code == 1) {
+                            layer.msg(data.msg, {
+                                icon: 6,
+                                time: 2000
+                            }, function () {
+                                location.href = data.url;
+                            });
+                        }else {
+                            layer.open({
+                                title: '文章删除失败',
+                                content: data.msg,
+                                icon: 5,
+                                anim: 6
+                            });
+                        }
+                    }
+                });
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+<!--  /Body -->
+</html>
