@@ -1,10 +1,14 @@
 这是一个基于layui，TP5.1的教学级个人博客系统，实现了一些功能。。
+
 前台功能：
+
 		登录、注册、导航、文章列表、文章详情、投稿功能、搜索、评论
 后台功能：
+
 		登录、注册、导航管理、文章管理、管理员管理、会员管理、评论管理、系统设置
 
 设计数据库tp_blog:
+
 	管理员表tp_admin
 自增id、用户名username、密码password、昵称nickname、邮箱email、状态status、超级管理员is_super、添加时间create_time、更新时间update_time、软删除delete_time
 	
